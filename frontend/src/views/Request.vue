@@ -1,19 +1,22 @@
 <template>
   <div>
+    <h1>Запросы</h1>
     {{content}}
   </div>
 </template>
 
-
 <script>
 import UserService from '../services/user.service';
+
 export default {
-  name: 'Home',
-  data: () => ({
-    content: ''
-  }),
+  name: 'Request',
+  data() {
+    return {
+      content: ''
+    };
+  },
   mounted() {
-    UserService.getPublicContent().then(
+    UserService.getUserBoard().then(
         response => {
           this.content = response.data;
         },
