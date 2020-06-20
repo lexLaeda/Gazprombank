@@ -1,0 +1,11 @@
+.gp-app-bar {
+  border-bottom: 2px solid;
+  background: $lighten1 !important;
+  border-color: $border-color !important;
+  box-shadow: none;
+
+  &__logo {
+    display: block;
+    fill: $darken2;
+  }
+}
