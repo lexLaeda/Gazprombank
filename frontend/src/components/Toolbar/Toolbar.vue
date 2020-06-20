@@ -40,9 +40,12 @@
         <v-icon>mdi-login-variant</v-icon>
       </v-btn>
 
-      <v-btn v-else icon color="black">
-        <v-icon>mdi-logout-variant</v-icon>
-      </v-btn>
+      <div v-else>
+        <router-link :to="{name: 'profile'}">Профиль</router-link>
+        <v-btn icon color="black">
+          <v-icon>mdi-logout-variant</v-icon>
+        </v-btn>
+      </div>
 
     </v-app-bar>
 
