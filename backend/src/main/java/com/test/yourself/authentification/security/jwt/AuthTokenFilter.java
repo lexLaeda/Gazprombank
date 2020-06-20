@@ -20,23 +20,21 @@ import java.io.IOException;
 @Service
 public class AuthTokenFilter extends OncePerRequestFilter {
 
+    @Autowired
     private JwtUtils jwtUtils;
 
+    @Qualifier("userDetailsServiceImpl")
+    @Autowired
     private UserDetailsService userDetailsService;
 
-    @Autowired
-    public AuthTokenFilter(JwtUtils jwtUtils, @Qualifier("userDetailsServiceImpl") UserDetailsService userDetailsService) {
-        this.jwtUtils = jwtUtils;
-        this.userDetailsService = userDetailsService;
-    }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try{
             String jwt = parseJwt(request);
             if (jwt != null && jwtUtils.validateJwtToken(jwt)){
-                String userName = jwtUtils.getUserNameFromJwtTocken(jwt);
-
+                String userName = jwtUtils.getUserNameFromJwtToken(jwt);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
@@ -46,16 +44,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         } catch (Exception ex){
             ex.printStackTrace();
         }
+
         filterChain.doFilter(request, response);
     }
 
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
-
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
             return headerAuth.substring(7);
         }
-
         return null;
     }
 }

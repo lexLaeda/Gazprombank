@@ -26,23 +26,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 )
 public class WevSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Qualifier("userDetailsServiceImpl")
-    @Autowired
+
     private UserDetailsService userDetailsService;
 
-    @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
-    @Autowired
-    private AuthTokenFilter authTokenFilter;
 
-    @Override
-    public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+
+    @Autowired
+    public WevSecurityConfig(@Qualifier("userDetailsServiceImpl") UserDetailsService userDetailsService, AuthEntryPointJwt unauthorizedHandler) {
+        this.userDetailsService = userDetailsService;
+        this.unauthorizedHandler = unauthorizedHandler;
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public AuthTokenFilter authenticationJwtTokenFilter() {
+        return new AuthTokenFilter();
+    }
+
+    @Override
+    public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+    }
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
@@ -61,7 +69,8 @@ public class WevSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/test/**").permitAll()
                 .anyRequest().authenticated();
 
-        http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
+
 }
 

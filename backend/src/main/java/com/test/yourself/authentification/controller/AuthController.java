@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,31 +42,38 @@ public class AuthController {
 
     private RoleRepository roleRepository;
 
-    private PasswordEncoder encoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private JwtUtils jwtUtils;
 
 
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder encoder, JwtUtils jwtUtils) {
+    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtils jwtUtils) {
 
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.encoder = encoder;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtUtils = jwtUtils;
     }
 
     @PostMapping("/signin")
     public ResponseEntity<?> authentificateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-        AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), roles));
+        try{
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+
+            Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), roles));
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return ResponseEntity.badRequest().body(new MessageResponse("Бля"));
+
     }
 
     @PostMapping("/signup")
@@ -84,13 +92,13 @@ public class AuthController {
         User user = new User(
                 signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword())
+                bCryptPasswordEncoder.encode(signUpRequest.getPassword())
         );
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
-        if (strRoles == null){
+        if (strRoles == null || strRoles.size() == 0){
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(()->new RuntimeException("Error: Role is not found!"));
             roles.add(userRole);
