@@ -1,11 +1,6 @@
-.gp-app-bar {
+.v-app-bar {
+  background: #fff !important;
   border-bottom: 2px solid;
-  background: $lighten1 !important;
-  border-color: $border-color !important;
-  box-shadow: none;
-
-  &__logo {
-    display: block;
-    fill: $darken2;
-  }
+  border-color: #E0E0E0 !important;
+  box-shadow: none !important;
 }

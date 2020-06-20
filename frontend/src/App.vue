@@ -2,11 +2,11 @@
   <v-app>
     <toolbar></toolbar>
 
-    <v-content>
+    <v-main>
       <v-container class="py-10 fill-height flex-column align-stretch">
         <router-view></router-view>
       </v-container>
-    </v-content>
+    </v-main>
 
     <v-footer
         color="primary darken-2"
