@@ -62,7 +62,7 @@ import User from '../models/user';
 export default {
   name: 'Login',
   data: () => ({
-    user: new User('', '', ''),
+    user: new User('', ''),
     message: '',
     valid: true,
     showPassword: false,

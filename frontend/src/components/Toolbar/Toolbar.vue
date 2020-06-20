@@ -19,7 +19,7 @@
 
       <v-spacer></v-spacer>
 
-      <div class="hidden-sm-and-down">
+      <div class="hidden-sm-and-down" v-if="showMenu">
         <v-btn
             v-for="(item, index) in mainMenuList"
             :key="index"
@@ -34,13 +34,13 @@
         <v-icon>mdi-message-processing</v-icon>
       </v-btn>
 
-      <v-btn v-if="currentUser" icon color="black"
+      <v-btn v-if="!currentUser" icon color="black"
              :to="{name: 'login'}"
       >
         <v-icon>mdi-login-variant</v-icon>
       </v-btn>
 
-      <div v-else>
+      <div v-if="currentUser">
         <router-link :to="{name: 'profile'}">Профиль</router-link>
         <v-btn icon color="black" @click="logOut">
           <v-icon>mdi-logout-variant</v-icon>
@@ -58,6 +58,7 @@
       <v-list
           nav
           dense
+          v-if="showMenu"
       >
         <v-list-item v-for="(item, index) in mainMenuList" :key="index" :to="item.path" link>
           <v-list-item-content>
@@ -79,7 +80,7 @@ export default {
   data: () => ({
     drawer: false,
     mainMenuList: [
-      new menuItem('Лента', '/'),
+      new menuItem('Лента', '/news'),
       new menuItem('Статьи', '/articles'),
       new menuItem('Запросы', '/requests'),
       new menuItem('Достижения', '/achievements'),
@@ -89,6 +90,23 @@ export default {
     currentUser() {
       return this.$store.state.auth.user;
     },
+    showAdminBoard() {
+      if (this.currentUser && this.currentUser.roles) {
+        return this.currentUser.roles.includes('ROLE_ADMIN');
+      }
+
+      return false;
+    },
+    showModeratorBoard() {
+      if (this.currentUser && this.currentUser.roles) {
+        return this.currentUser.roles.includes('ROLE_MODERATOR');
+      }
+
+      return false;
+    },
+    showMenu() {
+      return (this.currentUser || this.showAdminBoard || this.showModeratorBoard);
+    }
   },
   methods: {
     logOut() {
