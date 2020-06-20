@@ -34,7 +34,7 @@
         <v-icon>mdi-message-processing</v-icon>
       </v-btn>
 
-      <v-btn v-if="!auth" icon color="black"
+      <v-btn v-if="currentUser" icon color="black"
              :to="{name: 'login'}"
       >
         <v-icon>mdi-login-variant</v-icon>
@@ -42,7 +42,7 @@
 
       <div v-else>
         <router-link :to="{name: 'profile'}">Профиль</router-link>
-        <v-btn icon color="black">
+        <v-btn icon color="black" @click="logOut">
           <v-icon>mdi-logout-variant</v-icon>
         </v-btn>
       </div>
@@ -78,14 +78,24 @@ export default {
   name: 'Toolbar',
   data: () => ({
     drawer: false,
-    auth: false,
     mainMenuList: [
       new menuItem('Лента', '/'),
       new menuItem('Статьи', '/articles'),
       new menuItem('Запросы', '/requests'),
       new menuItem('Достижения', '/achievements'),
     ],
-  })
+  }),
+  computed: {
+    currentUser() {
+      return this.$store.state.auth.user;
+    },
+  },
+  methods: {
+    logOut() {
+      this.$store.dispatch('auth/logout');
+      this.$router.push('/login');
+    }
+  }
 }
 class menuItem {
   constructor(title, path) {
