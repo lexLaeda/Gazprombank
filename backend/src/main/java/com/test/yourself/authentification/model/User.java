@@ -15,7 +15,7 @@ import java.util.Set;
 @Getter
 @Setter
 @EqualsAndHashCode
-@Table(name = "user",
+@Table(name = "user_table",
 uniqueConstraints = {
         @UniqueConstraint(columnNames = "username"),
         @UniqueConstraint(columnNames = "email")

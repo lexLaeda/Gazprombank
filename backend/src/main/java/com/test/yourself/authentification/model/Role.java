@@ -13,6 +13,8 @@ import javax.persistence.*;
 @EqualsAndHashCode
 public class Role {
 
+    @Id
+    @GeneratedValue
     private Long id;
 
     @Enumerated(EnumType.STRING)
